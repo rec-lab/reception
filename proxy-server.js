@@ -21,25 +21,13 @@ app.post('/send-slack-notification', async (req, res) => {
     const { text } = req.body;
 
     if (!text) {
-      console.error('Error: Text is required in the request body');
       return res.status(400).send({ success: false, error: 'Text is required in the request body' });
     }
 
-    if (!SLACK_WEBHOOK_URL) {
-      console.error('Error: Slack Webhook URL is not configured');
-      return res.status(500).send({ success: false, error: 'Slack Webhook URL is not configured' });
-    }
-
-    // Slack Webhook にリクエストを送信
     const response = await axios.post(SLACK_WEBHOOK_URL, { text });
-    console.log('Slack notification sent successfully:', response.data);
     res.status(200).send({ success: true, data: response.data });
   } catch (error) {
-    console.error('Error sending Slack notification:', error.response?.data || error.message);
-    res.status(500).send({
-      success: false,
-      error: error.response?.data || error.message || 'Unknown error',
-    });
+    res.status(500).send({ success: false, error: error.message });
   }
 });
 

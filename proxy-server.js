@@ -38,7 +38,7 @@ app.listen(PORT, () => {
 
 // CORS 設定を追加
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); // 必要なら特定のオリジンに限定
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   next();

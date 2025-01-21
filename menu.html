@@ -126,6 +126,31 @@
     function navigate(url) {
       window.location.href = url;
     }
+
+    (function () {
+    const TIMEOUT = 30000; // タイムアウト時間（30秒）
+    const topPageUrl = "index.html"; // TOP画面のURL
+    let timeoutId;
+
+    function resetTimer() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        window.location.href = topPageUrl;
+      }, TIMEOUT);
+    }
+
+    function setupActivityListener() {
+      document.addEventListener("mousemove", resetTimer);
+      document.addEventListener("keydown", resetTimer);
+      document.addEventListener("click", resetTimer);
+      document.addEventListener("scroll", resetTimer);
+      document.addEventListener("touchstart", resetTimer);
+    }
+
+    setupActivityListener();
+    resetTimer();
+  })();
+
   </script>
 </body>
 </html>

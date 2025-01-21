@@ -112,6 +112,27 @@
       background-color: #004085;
       box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    .button-container {
+    text-align: center;
+    margin-top: 20px;
+    }
+
+    .back-button {
+      background-color: transparent; /* 背景を透明に設定 */
+      color: #333; /* テキストの色を黒に設定 */
+      border: 2px solid #333; /* 黒い枠線を設定 */
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #333; /* ホバー時に黒い背景 */
+      color: white; /* テキストを白に変更 */
+    }
   </style>
 </head>
 <body>
@@ -130,6 +151,11 @@
 
     <!-- 確認ボタン -->
     <button id="confirm-button" disabled>確認</button>
+  </div>
+
+  <!-- 戻るボタンを追加 -->
+  <div class="button-container">
+    <button id="back-button" class="back-button">戻る</button>
   </div>
 
   <script>
@@ -151,19 +177,50 @@
       }
     }
 
+    // 戻るボタンの処理
+    const backButton = document.getElementById('back-button');
+    backButton.addEventListener('click', () => {
+    // メニュー画面に遷移
+    window.location.href = 'menu.html';
+    });
+
     // 入力イベントリスナー
     companyNameInput.addEventListener('input', checkInput);
     visitorNameInput.addEventListener('input', checkInput);
 
     // 確認ボタンクリック時の動作
     confirmButton.addEventListener('click', () => {
-  const companyName = companyNameInput.value.trim();
-  const visitorName = visitorNameInput.value.trim();
+    const companyName = companyNameInput.value.trim();
+    const visitorName = visitorNameInput.value.trim();
 
-  // URLパラメータを生成
-  const url = `confirmation.html?mode=general&company=${encodeURIComponent(companyName)}&name=${encodeURIComponent(visitorName)}`;
-  window.location.href = url;
-});
+    // URLパラメータを生成
+    const url = `confirmation.html?mode=general&company=${encodeURIComponent(companyName)}&name=${encodeURIComponent(visitorName)}`;
+    window.location.href = url;
+    });
+
+    (function () {
+    const TIMEOUT = 30000; // タイムアウト時間（30秒）
+    const topPageUrl = "index.html"; // TOP画面のURL
+    let timeoutId;
+
+    function resetTimer() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        window.location.href = topPageUrl;
+      }, TIMEOUT);
+    }
+
+    function setupActivityListener() {
+      document.addEventListener("mousemove", resetTimer);
+      document.addEventListener("keydown", resetTimer);
+      document.addEventListener("click", resetTimer);
+      document.addEventListener("scroll", resetTimer);
+      document.addEventListener("touchstart", resetTimer);
+    }
+
+    setupActivityListener();
+    resetTimer();
+  })();
   </script>
 </body>
 </html>

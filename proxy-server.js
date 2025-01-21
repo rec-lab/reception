@@ -1,21 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const cors = require('cors'); // CORSモジュールをインポート
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Slack Webhook URL を環境変数から取得
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+
+// CORS を許可する
+app.use(cors());
 
 app.use(bodyParser.json());
 
-// トップページのルート
-app.get('/', (req, res) => {
-  res.send('Proxy server is running!');
-});
-
-// Slack 通知を送信するエンドポイント
 app.post('/send-slack-notification', async (req, res) => {
   try {
     const { text } = req.body;
@@ -27,11 +23,11 @@ app.post('/send-slack-notification', async (req, res) => {
     const response = await axios.post(SLACK_WEBHOOK_URL, { text });
     res.status(200).send({ success: true, data: response.data });
   } catch (error) {
+    console.error('Slack Webhook Error:', error.message);
     res.status(500).send({ success: false, error: error.message });
   }
 });
 
-// サーバーを起動
 app.listen(PORT, () => {
   console.log(`Proxy server running on port ${PORT}`);
 });

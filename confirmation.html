@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reception App - Confirmation</title>
+  <style>
+    /* 全体のスタイル */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ロゴの基本スタイル */
+    #logo {
+      width: 100px;
+      height: auto;
+      margin: 1%;
+      cursor: pointer;
+      position: relative;
+      animation: spin-stop 5s linear infinite; /* 回転と停止を繰り返すアニメーション */
+      transition: transform 1s ease, opacity 1s ease; /* タップ時のアニメーション */
+    }
+
+    /* 回転と静止アニメーション */
+    @keyframes spin-stop {
+      0% {
+        transform: rotateY(0deg);
+      }
+      20% {
+        transform: rotateY(0deg); /* 2回転 */
+      }
+      40% {
+        transform: rotateY(720deg); /* 静止 */
+      }
+      100% {
+        transform: rotateY(720deg); /* 静止維持 */
+      }
+    }
+
+    .confirmation-box, .completion-box {
+      background-color: #ffffff;
+      width: 90%;
+      max-width: 500px;
+      padding: 20px 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .message {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #333;
+    }
+
+    .info {
+      font-size: 16px;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #555;
+      word-break: break-word;
+    }
+
+    #call-button, #home-button {
+      background-color: #4299e1;
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s, box-shadow 0.3s;
+      width: 100%;
+      max-width: 200px;
+      margin-top: 20px;
+    }
+
+    #call-button:hover, #home-button:hover {
+      background-color: #004085;
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 完了画面の初期非表示 */
+    .completion-box {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <img id="logo" src="images/logo.png" alt="Company Logo">
+
+  <!-- 確認画面 -->
+  <div id="confirmation-box" class="confirmation-box">
+    <div class="message">この内容で担当者を呼び出しますか？</div>
+    <div id="info" class="info"></div>
+    <button id="call-button">呼び出し</button>
+  </div>
+
+  <!-- 完了画面 -->
+  <div id="completion-box" class="completion-box">
+    <div class="message">呼び出しが完了しました。<br>担当者が向かいますので、しばらくお待ちください。</div>
+    <button id="home-button">HOME</button>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode') || 'unknown';
+    const companyName = urlParams.get('company') || '未入力';
+    const visitorName = urlParams.get('name') || '未入力';
+
+    const infoDiv = document.getElementById('info');
+    const confirmationBox = document.getElementById('confirmation-box');
+    const completionBox = document.getElementById('completion-box');
+    const callButton = document.getElementById('call-button');
+    const homeButton = document.getElementById('home-button');
+
+    const slackWebhookUrl = 'http://localhost:3000/send-slack-notification';
+
+    switch (mode) {
+      case 'general':
+        infoDiv.innerHTML = `
+          <div>企業名: ${companyName}</div>
+          <div>氏名: ${visitorName}</div>
+        `;
+        break;
+      case 'interview':
+        infoDiv.innerHTML = `
+          <div>氏名: ${visitorName}</div>
+        `;
+        break;
+      case 'building':
+        infoDiv.textContent = 'ビル関係者様';
+        break;
+      case 'delivery':
+        infoDiv.textContent = '配送業者様';
+        break;
+      default:
+        infoDiv.textContent = '情報がありません';
+    }
+
+    callButton.addEventListener('click', () => {
+      let message = '';
+
+      // Slack に送信するメッセージのフォーマット
+      switch (mode) {
+        case 'general':
+          message = `<!channel>\n来訪者のご対応をお願いします！\n\n----------------------------------------------\n項　目：総合受付\n企業名：${companyName}\n氏　名：${visitorName}\n----------------------------------------------`;
+          break;
+        case 'interview':
+          message = `<!channel>\n面接希望者のご対応をお願いします！\n\n----------------------------------------------\n項　目：採用面接\n氏　名：${visitorName}\n----------------------------------------------`;
+          break;
+        case 'building':
+          message = `<!channel>\nビル関係者様のご対応をお願いします！⚠`;
+          break;
+        case 'delivery':
+          message = `<!channel>\n配送業者様のご対応をお願いします！🚛`;
+          break;
+        default:
+          alert('通知の送信に失敗しました。');
+          return;
+      }
+
+      // プロキシサーバー経由で Slack にリクエストを送信
+      fetch(slackWebhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: message }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            // 確認画面を非表示にして完了画面を表示
+            confirmationBox.style.display = 'none';
+            completionBox.style.display = 'flex';
+          } else {
+            alert('通知の送信に失敗しました。');
+          }
+        })
+        .catch((error) => {
+          console.error('Fetch Error:', error);
+          alert('通知の送信中にエラーが発生しました。');
+        });
+    });
+
+    homeButton.addEventListener('click', () => {
+      window.location.href = 'index.html'; // TOP画面に遷移
+    });
+  </script>
+</body>
+</html>

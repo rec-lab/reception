@@ -36,7 +36,7 @@ app.listen(PORT, () => {
   console.log(`Proxy server running on port ${PORT}`);
 });
 
-// CORS を許可する Middleware を追加
+// CORS 設定を追加
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // 必要なら特定のオリジンに限定
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');

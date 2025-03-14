@@ -69,6 +69,11 @@
         window.location.href = 'menu.html'; // メニュー画面への遷移先を指定
       }, 1000); // フェードアウトが完了するタイミングで遷移
     });
+
+    // 1分後に自動リロード
+    setTimeout(() => {
+      location.reload();
+    }, 60000);
   </script>
 </body>
 </html>
